@@ -27,11 +27,6 @@
 	</repositories>
 
 	<dependencies>
-
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
@@ -50,38 +45,12 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
         </dependency>
-        <!-- 
-		<dependency>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-deploy-plugin</artifactId>
-			<version>2.8.1</version>
-			<type>maven-plugin</type>
-		</dependency>
-		 -->
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<configuration>
-					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-				</configuration>
-				<executions>
-					<execution>
-						<id>mojo-descriptor</id>
-						<goals>
-							<goal>descriptor</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>help-goal</id>
-						<goals>
-							<goal>helpmojo</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.ops4j</groupId>
@@ -90,18 +59,6 @@
 					<execution>
 						<goals>
 							<goal>inherit</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>sisu-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>generate-index</id>
-						<goals>
-							<goal>main-index</goal>
 						</goals>
 					</execution>
 				</executions>
