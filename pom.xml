@@ -5,8 +5,7 @@
 	<parent>
 		<groupId>org.sourcepit</groupId>
 		<artifactId>srcpit-parent</artifactId>
-		<version>11-SNAPSHOT</version>
-		<relativePath>../srcpit-parent</relativePath>
+		<version>11</version>
 	</parent>
 
 	<groupId>org.sourcepit.tools</groupId>
