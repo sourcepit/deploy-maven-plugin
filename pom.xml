@@ -14,9 +14,10 @@
 
 	<packaging>maven-plugin</packaging>
 
-	<scm>
-		<connection>scm:svn:http://svn.sourcepit.org/tools/trunk/deploy-maven-plugin</connection>
-	</scm>
+    <scm>
+        <connection>scm:git:git@github.com:sourcepit/deploy-maven-plugin.git</connection>
+        <tag>HEAD</tag>
+    </scm>
 
 	<repositories>
 		<repository>
