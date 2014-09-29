@@ -1,23 +1,20 @@
-package org.sourcepit.tools.mojo;
-
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright 2014 Bernd Vogt and others.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+package org.sourcepit.tools.mojo;
 
 import java.io.File;
 import java.util.Map;
@@ -38,156 +35,152 @@ import org.apache.maven.plugins.annotations.Parameter;
 /**
  * @version $Id: AbstractDeployMojo.java 1531347 2013-10-11 16:38:02Z rfscholte $
  */
-public abstract class AbstractDeployMojo
-    extends AbstractMojo
+public abstract class AbstractDeployMojo extends AbstractMojo
 {
-    /**
+   /**
      */
-    @Component
-    private ArtifactDeployer deployer;
+   @Component
+   private ArtifactDeployer deployer;
 
-    /**
-     * Component used to create an artifact.
+   /**
+    * Component used to create an artifact.
+    */
+   @Component
+   protected ArtifactFactory artifactFactory;
+
+   /**
+    * Component used to create a repository.
+    */
+   @Component
+   ArtifactRepositoryFactory repositoryFactory;
+
+   /**
+    * Map that contains the layouts.
+    */
+   @Component(role = ArtifactRepositoryLayout.class)
+   private Map<String, ArtifactRepositoryLayout> repositoryLayouts;
+
+   /**
      */
-    @Component
-    protected ArtifactFactory artifactFactory;
+   @Parameter(defaultValue = "${localRepository}", required = true, readonly = true)
+   private ArtifactRepository localRepository;
 
-    /**
-     * Component used to create a repository.
-     */
-    @Component
-    ArtifactRepositoryFactory repositoryFactory;
+   /**
+    * Flag whether Maven is currently in online/offline mode.
+    */
+   @Parameter(defaultValue = "${settings.offline}", readonly = true)
+   private boolean offline;
 
-    /**
-     * Map that contains the layouts.
-     */
-    @Component( role = ArtifactRepositoryLayout.class )
-    private Map<String, ArtifactRepositoryLayout> repositoryLayouts;
+   /**
+    * Parameter used to update the metadata to make the artifact as release.
+    */
+   @Parameter(property = "updateReleaseInfo", defaultValue = "false")
+   protected boolean updateReleaseInfo;
 
-    /**
-     */
-    @Parameter( defaultValue = "${localRepository}", required = true, readonly = true )
-    private ArtifactRepository localRepository;
+   /**
+    * Parameter used to control how many times a failed deployment will be retried before giving up and failing. If a
+    * value outside the range 1-10 is specified it will be pulled to the nearest value within the range 1-10.
+    * 
+    * @since 2.7
+    */
+   @Parameter(property = "retryFailedDeploymentCount", defaultValue = "1")
+   private int retryFailedDeploymentCount;
 
-    /**
-     * Flag whether Maven is currently in online/offline mode.
-     */
-    @Parameter( defaultValue = "${settings.offline}", readonly = true )
-    private boolean offline;
+   /* Setters and Getters */
 
-    /**
-     * Parameter used to update the metadata to make the artifact as release.
-     */
-    @Parameter( property = "updateReleaseInfo", defaultValue = "false" )
-    protected boolean updateReleaseInfo;
+   public ArtifactDeployer getDeployer()
+   {
+      return deployer;
+   }
 
-    /**
-     * Parameter used to control how many times a failed deployment will be retried before giving up and failing. If a
-     * value outside the range 1-10 is specified it will be pulled to the nearest value within the range 1-10.
-     * 
-     * @since 2.7
-     */
-    @Parameter( property = "retryFailedDeploymentCount", defaultValue = "1" )
-    private int retryFailedDeploymentCount;
+   public void setDeployer(ArtifactDeployer deployer)
+   {
+      this.deployer = deployer;
+   }
 
-    /* Setters and Getters */
+   public ArtifactRepository getLocalRepository()
+   {
+      return localRepository;
+   }
 
-    public ArtifactDeployer getDeployer()
-    {
-        return deployer;
-    }
+   public void setLocalRepository(ArtifactRepository localRepository)
+   {
+      this.localRepository = localRepository;
+   }
 
-    public void setDeployer( ArtifactDeployer deployer )
-    {
-        this.deployer = deployer;
-    }
+   void failIfOffline() throws MojoFailureException
+   {
+      if (offline)
+      {
+         throw new MojoFailureException("Cannot deploy artifacts when Maven is in offline mode");
+      }
+   }
 
-    public ArtifactRepository getLocalRepository()
-    {
-        return localRepository;
-    }
+   ArtifactRepositoryLayout getLayout(String id) throws MojoExecutionException
+   {
+      ArtifactRepositoryLayout layout = repositoryLayouts.get(id);
 
-    public void setLocalRepository( ArtifactRepository localRepository )
-    {
-        this.localRepository = localRepository;
-    }
+      if (layout == null)
+      {
+         throw new MojoExecutionException("Invalid repository layout: " + id);
+      }
 
-    void failIfOffline()
-        throws MojoFailureException
-    {
-        if ( offline )
-        {
-            throw new MojoFailureException( "Cannot deploy artifacts when Maven is in offline mode" );
-        }
-    }
+      return layout;
+   }
 
-    ArtifactRepositoryLayout getLayout( String id )
-        throws MojoExecutionException
-    {
-        ArtifactRepositoryLayout layout = repositoryLayouts.get( id );
+   boolean isUpdateReleaseInfo()
+   {
+      return updateReleaseInfo;
+   }
 
-        if ( layout == null )
-        {
-            throw new MojoExecutionException( "Invalid repository layout: " + id );
-        }
+   int getRetryFailedDeploymentCount()
+   {
+      return retryFailedDeploymentCount;
+   }
 
-        return layout;
-    }
-
-    boolean isUpdateReleaseInfo()
-    {
-        return updateReleaseInfo;
-    }
-    
-    int getRetryFailedDeploymentCount()
-    {
-        return retryFailedDeploymentCount;
-    }
-    
-    /**
-     * Deploy an artifact from a particular file.
-     * 
-     * @param source the file to deploy
-     * @param artifact the artifact definition
-     * @param deploymentRepository the repository to deploy to
-     * @param localRepository the local repository to install into
-     * @param retryFailedDeploymentCount TODO
-     * @throws ArtifactDeploymentException if an error occurred deploying the artifact
-     */
-    protected void deploy( File source, Artifact artifact, ArtifactRepository deploymentRepository,
-                           ArtifactRepository localRepository, int retryFailedDeploymentCount )
-        throws ArtifactDeploymentException
-    {
-        int retryFailedDeploymentCounter = Math.max( 1, Math.min( 10, retryFailedDeploymentCount ) );
-        ArtifactDeploymentException exception = null;
-        for ( int count = 0; count < retryFailedDeploymentCounter; count++ )
-        {
-            try
+   /**
+    * Deploy an artifact from a particular file.
+    * 
+    * @param source the file to deploy
+    * @param artifact the artifact definition
+    * @param deploymentRepository the repository to deploy to
+    * @param localRepository the local repository to install into
+    * @param retryFailedDeploymentCount TODO
+    * @throws ArtifactDeploymentException if an error occurred deploying the artifact
+    */
+   protected void deploy(File source, Artifact artifact, ArtifactRepository deploymentRepository,
+      ArtifactRepository localRepository, int retryFailedDeploymentCount) throws ArtifactDeploymentException
+   {
+      int retryFailedDeploymentCounter = Math.max(1, Math.min(10, retryFailedDeploymentCount));
+      ArtifactDeploymentException exception = null;
+      for (int count = 0; count < retryFailedDeploymentCounter; count++)
+      {
+         try
+         {
+            if (count > 0)
             {
-                if ( count > 0 )
-                {
-                    getLog().info( "Retrying deployment attempt " + ( count + 1 ) + " of " + retryFailedDeploymentCounter );
-                }
-                getDeployer().deploy( source, artifact, deploymentRepository, localRepository );
-                exception = null;
-                break;
+               getLog().info("Retrying deployment attempt " + (count + 1) + " of " + retryFailedDeploymentCounter);
             }
-            catch ( ArtifactDeploymentException e )
+            getDeployer().deploy(source, artifact, deploymentRepository, localRepository);
+            exception = null;
+            break;
+         }
+         catch (ArtifactDeploymentException e)
+         {
+            if (count + 1 < retryFailedDeploymentCounter)
             {
-                if ( count + 1 < retryFailedDeploymentCounter )
-                {
-                    getLog().warn( "Encountered issue during deployment: " + e.getLocalizedMessage() );
-                    getLog().debug( e );
-                }
-                if ( exception == null )
-                {
-                    exception = e;
-                }
+               getLog().warn("Encountered issue during deployment: " + e.getLocalizedMessage());
+               getLog().debug(e);
             }
-        }
-        if ( exception != null )
-        {
-            throw exception;
-        }
-    }
+            if (exception == null)
+            {
+               exception = e;
+            }
+         }
+      }
+      if (exception != null)
+      {
+         throw exception;
+      }
+   }
 }
