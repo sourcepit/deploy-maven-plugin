@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.sourcepit</groupId>
 		<artifactId>srcpit-parent</artifactId>
-		<version>20</version>
+		<version>21-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.sourcepit.tools</groupId>
