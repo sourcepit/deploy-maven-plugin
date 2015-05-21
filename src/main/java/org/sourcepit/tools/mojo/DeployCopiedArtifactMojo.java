@@ -40,8 +40,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 
 @Mojo(name = "deploy", defaultPhase = LifecyclePhase.DEPLOY, threadSafe = true)
-public class DeployCopiedArtifactMojo extends AbstractDeployMojo
-{
+public class DeployCopiedArtifactMojo extends AbstractDeployMojo {
    private static final Pattern ALT_REPO_SYNTAX_PATTERN = Pattern.compile("(.+)::(.+)::(.+)");
 
    /**
@@ -50,8 +49,7 @@ public class DeployCopiedArtifactMojo extends AbstractDeployMojo
     */
    private static final AtomicInteger readyProjectsCounter = new AtomicInteger();
 
-   private static final List<DeployRequest> deployRequests = Collections
-      .synchronizedList(new ArrayList<DeployRequest>());
+   private static final List<DeployRequest> deployRequests = Collections.synchronizedList(new ArrayList<DeployRequest>());
 
    /**
     */
@@ -137,33 +135,28 @@ public class DeployCopiedArtifactMojo extends AbstractDeployMojo
    @Parameter(property = "maven.deploy.skip", defaultValue = "false")
    private boolean skip;
 
-   public void execute() throws MojoExecutionException, MojoFailureException
-   {
+   public void execute() throws MojoExecutionException, MojoFailureException {
       boolean projectsReady = readyProjectsCounter.incrementAndGet() == reactorProjects.size();
 
-      if (skip)
-      {
+      if (skip) {
          getLog().info("Skipping artifact deployment");
       }
-      else
-      {
+      else {
          failIfOffline();
 
          DeployRequest currentExecutionDeployRequest = new DeployRequest().setProject(project)
-            .setUpdateReleaseInfo(isUpdateReleaseInfo()).setRetryFailedDeploymentCount(getRetryFailedDeploymentCount())
+            .setUpdateReleaseInfo(isUpdateReleaseInfo())
+            .setRetryFailedDeploymentCount(getRetryFailedDeploymentCount())
             .setAltReleaseDeploymentRepository(altReleaseDeploymentRepository)
             .setAltSnapshotDeploymentRepository(altSnapshotDeploymentRepository)
             .setAltDeploymentRepository(altDeploymentRepository);
 
-         if (!deployAtEnd)
-         {
+         if (!deployAtEnd) {
             deployProject(currentExecutionDeployRequest);
          }
-         else
-         {
+         else {
             deployRequests.add(currentExecutionDeployRequest);
-            if (!projectsReady)
-            {
+            if (!projectsReady) {
                getLog().info(
                   "Deploying " + project.getGroupId() + ":" + project.getArtifactId() + ":" + project.getVersion()
                      + " at end");
@@ -171,20 +164,16 @@ public class DeployCopiedArtifactMojo extends AbstractDeployMojo
          }
       }
 
-      if (projectsReady)
-      {
-         synchronized (deployRequests)
-         {
-            while (!deployRequests.isEmpty())
-            {
+      if (projectsReady) {
+         synchronized (deployRequests) {
+            while (!deployRequests.isEmpty()) {
                deployProject(deployRequests.remove(0));
             }
          }
       }
    }
 
-   private void deployProject(DeployRequest request) throws MojoExecutionException, MojoFailureException
-   {
+   private void deployProject(DeployRequest request) throws MojoExecutionException, MojoFailureException {
       Artifact artifact = ArtifactUtils.copyArtifact(request.getProject().getArtifact());
 
       String packaging = request.getProject().getPackaging();
@@ -199,54 +188,44 @@ public class DeployCopiedArtifactMojo extends AbstractDeployMojo
 
       String protocol = repo.getProtocol();
 
-      if (protocol.equalsIgnoreCase("scp"))
-      {
+      if (protocol.equalsIgnoreCase("scp")) {
          File sshFile = new File(System.getProperty("user.home"), ".ssh");
 
-         if (!sshFile.exists())
-         {
+         if (!sshFile.exists()) {
             sshFile.mkdirs();
          }
       }
 
       // Deploy the POM
       boolean isPomArtifact = "pom".equals(packaging);
-      if (!isPomArtifact)
-      {
+      if (!isPomArtifact) {
          ArtifactMetadata metadata = new ProjectArtifactMetadata(artifact, pomFile);
          artifact.addMetadata(metadata);
       }
 
-      if (request.isUpdateReleaseInfo())
-      {
+      if (request.isUpdateReleaseInfo()) {
          artifact.setRelease(true);
       }
 
       int retryFailedDeploymentCount = request.getRetryFailedDeploymentCount();
 
-      try
-      {
-         if (isPomArtifact)
-         {
+      try {
+         if (isPomArtifact) {
             deploy(pomFile, artifact, repo, getLocalRepository(), retryFailedDeploymentCount);
          }
-         else
-         {
+         else {
             File file = artifact.getFile();
 
-            if (file != null && file.isFile())
-            {
+            if (file != null && file.isFile()) {
                deploy(file, artifact, repo, getLocalRepository(), retryFailedDeploymentCount);
             }
-            else if (!attachedArtifacts.isEmpty())
-            {
+            else if (!attachedArtifacts.isEmpty()) {
                getLog().info("No primary artifact to deploy, deploying attached artifacts instead.");
 
                Artifact pomArtifact = artifactFactory.createProjectArtifact(artifact.getGroupId(),
                   artifact.getArtifactId(), artifact.getBaseVersion());
                pomArtifact.setFile(pomFile);
-               if (request.isUpdateReleaseInfo())
-               {
+               if (request.isUpdateReleaseInfo()) {
                   pomArtifact.setRelease(true);
                }
 
@@ -255,57 +234,47 @@ public class DeployCopiedArtifactMojo extends AbstractDeployMojo
                // propagate the timestamped version to the main artifact for the attached artifacts to pick it up
                artifact.setResolvedVersion(pomArtifact.getVersion());
             }
-            else
-            {
+            else {
                String message = "The packaging for this project did not assign a file to the build artifact";
                throw new MojoExecutionException(message);
             }
          }
 
-         for (Artifact attached : attachedArtifacts)
-         {
+         for (Artifact attached : attachedArtifacts) {
             deploy(attached.getFile(), attached, repo, getLocalRepository(), retryFailedDeploymentCount);
          }
       }
-      catch (ArtifactDeploymentException e)
-      {
+      catch (ArtifactDeploymentException e) {
          throw new MojoExecutionException(e.getMessage(), e);
       }
    }
 
    ArtifactRepository getDeploymentRepository(MavenProject project, String altDeploymentRepository,
       String altReleaseDeploymentRepository, String altSnapshotDeploymentRepository) throws MojoExecutionException,
-      MojoFailureException
-   {
+      MojoFailureException {
       ArtifactRepository repo = null;
 
       String altDeploymentRepo;
-      if (ArtifactUtils.isSnapshot(project.getVersion()) && altSnapshotDeploymentRepository != null)
-      {
+      if (ArtifactUtils.isSnapshot(project.getVersion()) && altSnapshotDeploymentRepository != null) {
          altDeploymentRepo = altSnapshotDeploymentRepository;
       }
-      else if (!ArtifactUtils.isSnapshot(project.getVersion()) && altReleaseDeploymentRepository != null)
-      {
+      else if (!ArtifactUtils.isSnapshot(project.getVersion()) && altReleaseDeploymentRepository != null) {
          altDeploymentRepo = altReleaseDeploymentRepository;
       }
-      else
-      {
+      else {
          altDeploymentRepo = altDeploymentRepository;
       }
 
-      if (altDeploymentRepo != null)
-      {
+      if (altDeploymentRepo != null) {
          getLog().info("Using alternate deployment repository " + altDeploymentRepo);
 
          Matcher matcher = ALT_REPO_SYNTAX_PATTERN.matcher(altDeploymentRepo);
 
-         if (!matcher.matches())
-         {
+         if (!matcher.matches()) {
             throw new MojoFailureException(altDeploymentRepo, "Invalid syntax for repository.",
                "Invalid syntax for alternative repository. Use \"id::layout::url\".");
          }
-         else
-         {
+         else {
             String id = matcher.group(1).trim();
             String layout = matcher.group(2).trim();
             String url = matcher.group(3).trim();
@@ -316,13 +285,11 @@ public class DeployCopiedArtifactMojo extends AbstractDeployMojo
          }
       }
 
-      if (repo == null)
-      {
+      if (repo == null) {
          repo = project.getDistributionManagementArtifactRepository();
       }
 
-      if (repo == null)
-      {
+      if (repo == null) {
          String msg = "Deployment failed: repository element was not specified in the POM inside"
             + " distributionManagement element or in -DaltDeploymentRepository=id::layout::url parameter";
 

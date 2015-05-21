@@ -23,8 +23,7 @@ import org.apache.maven.project.MavenProject;
  * @author Robert Scholte
  * @since 2.8.1
  */
-class DeployRequest
-{
+class DeployRequest {
 
    // From AbstractDeployMojo
 
@@ -45,16 +44,14 @@ class DeployRequest
    /**
     * @return the updateReleaseInfo
     */
-   public boolean isUpdateReleaseInfo()
-   {
+   public boolean isUpdateReleaseInfo() {
       return updateReleaseInfo;
    }
 
    /**
     * @param updateReleaseInfo the updateReleaseInfo to set
     */
-   public DeployRequest setUpdateReleaseInfo(boolean updateReleaseInfo)
-   {
+   public DeployRequest setUpdateReleaseInfo(boolean updateReleaseInfo) {
       this.updateReleaseInfo = updateReleaseInfo;
       return this;
    }
@@ -62,16 +59,14 @@ class DeployRequest
    /**
     * @return the retryFailedDeploymentCount
     */
-   public int getRetryFailedDeploymentCount()
-   {
+   public int getRetryFailedDeploymentCount() {
       return retryFailedDeploymentCount;
    }
 
    /**
     * @param retryFailedDeploymentCount the retryFailedDeploymentCount to set
     */
-   public DeployRequest setRetryFailedDeploymentCount(int retryFailedDeploymentCount)
-   {
+   public DeployRequest setRetryFailedDeploymentCount(int retryFailedDeploymentCount) {
       this.retryFailedDeploymentCount = retryFailedDeploymentCount;
       return this;
    }
@@ -79,16 +74,14 @@ class DeployRequest
    /**
     * @return the project
     */
-   public MavenProject getProject()
-   {
+   public MavenProject getProject() {
       return project;
    }
 
    /**
     * @param project the project to set
     */
-   public DeployRequest setProject(MavenProject project)
-   {
+   public DeployRequest setProject(MavenProject project) {
       this.project = project;
       return this;
    }
@@ -96,16 +89,14 @@ class DeployRequest
    /**
     * @return the altDeploymentRepository
     */
-   public String getAltDeploymentRepository()
-   {
+   public String getAltDeploymentRepository() {
       return altDeploymentRepository;
    }
 
    /**
     * @param altDeploymentRepository the altDeploymentRepository to set
     */
-   public DeployRequest setAltDeploymentRepository(String altDeploymentRepository)
-   {
+   public DeployRequest setAltDeploymentRepository(String altDeploymentRepository) {
       this.altDeploymentRepository = altDeploymentRepository;
       return this;
    }
@@ -113,16 +104,14 @@ class DeployRequest
    /**
     * @return the altSnapshotDeploymentRepository
     */
-   public String getAltSnapshotDeploymentRepository()
-   {
+   public String getAltSnapshotDeploymentRepository() {
       return altSnapshotDeploymentRepository;
    }
 
    /**
     * @param altSnapshotDeploymentRepository the altSnapshotDeploymentRepository to set
     */
-   public DeployRequest setAltSnapshotDeploymentRepository(String altSnapshotDeploymentRepository)
-   {
+   public DeployRequest setAltSnapshotDeploymentRepository(String altSnapshotDeploymentRepository) {
       this.altSnapshotDeploymentRepository = altSnapshotDeploymentRepository;
       return this;
    }
@@ -130,16 +119,14 @@ class DeployRequest
    /**
     * @return the altReleaseDeploymentRepository
     */
-   public String getAltReleaseDeploymentRepository()
-   {
+   public String getAltReleaseDeploymentRepository() {
       return altReleaseDeploymentRepository;
    }
 
    /**
     * @param altReleaseDeploymentRepository the altReleaseDeploymentRepository to set
     */
-   public DeployRequest setAltReleaseDeploymentRepository(String altReleaseDeploymentRepository)
-   {
+   public DeployRequest setAltReleaseDeploymentRepository(String altReleaseDeploymentRepository) {
       this.altReleaseDeploymentRepository = altReleaseDeploymentRepository;
       return this;
    }

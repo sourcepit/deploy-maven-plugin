@@ -35,8 +35,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 /**
  * @version $Id: AbstractDeployMojo.java 1531347 2013-10-11 16:38:02Z rfscholte $
  */
-public abstract class AbstractDeployMojo extends AbstractMojo
-{
+public abstract class AbstractDeployMojo extends AbstractMojo {
    /**
      */
    @Component
@@ -88,53 +87,43 @@ public abstract class AbstractDeployMojo extends AbstractMojo
 
    /* Setters and Getters */
 
-   public ArtifactDeployer getDeployer()
-   {
+   public ArtifactDeployer getDeployer() {
       return deployer;
    }
 
-   public void setDeployer(ArtifactDeployer deployer)
-   {
+   public void setDeployer(ArtifactDeployer deployer) {
       this.deployer = deployer;
    }
 
-   public ArtifactRepository getLocalRepository()
-   {
+   public ArtifactRepository getLocalRepository() {
       return localRepository;
    }
 
-   public void setLocalRepository(ArtifactRepository localRepository)
-   {
+   public void setLocalRepository(ArtifactRepository localRepository) {
       this.localRepository = localRepository;
    }
 
-   void failIfOffline() throws MojoFailureException
-   {
-      if (offline)
-      {
+   void failIfOffline() throws MojoFailureException {
+      if (offline) {
          throw new MojoFailureException("Cannot deploy artifacts when Maven is in offline mode");
       }
    }
 
-   ArtifactRepositoryLayout getLayout(String id) throws MojoExecutionException
-   {
+   ArtifactRepositoryLayout getLayout(String id) throws MojoExecutionException {
       ArtifactRepositoryLayout layout = repositoryLayouts.get(id);
 
-      if (layout == null)
-      {
+      if (layout == null) {
          throw new MojoExecutionException("Invalid repository layout: " + id);
       }
 
       return layout;
    }
 
-   boolean isUpdateReleaseInfo()
-   {
+   boolean isUpdateReleaseInfo() {
       return updateReleaseInfo;
    }
 
-   int getRetryFailedDeploymentCount()
-   {
+   int getRetryFailedDeploymentCount() {
       return retryFailedDeploymentCount;
    }
 
@@ -149,37 +138,29 @@ public abstract class AbstractDeployMojo extends AbstractMojo
     * @throws ArtifactDeploymentException if an error occurred deploying the artifact
     */
    protected void deploy(File source, Artifact artifact, ArtifactRepository deploymentRepository,
-      ArtifactRepository localRepository, int retryFailedDeploymentCount) throws ArtifactDeploymentException
-   {
+      ArtifactRepository localRepository, int retryFailedDeploymentCount) throws ArtifactDeploymentException {
       int retryFailedDeploymentCounter = Math.max(1, Math.min(10, retryFailedDeploymentCount));
       ArtifactDeploymentException exception = null;
-      for (int count = 0; count < retryFailedDeploymentCounter; count++)
-      {
-         try
-         {
-            if (count > 0)
-            {
+      for (int count = 0; count < retryFailedDeploymentCounter; count++) {
+         try {
+            if (count > 0) {
                getLog().info("Retrying deployment attempt " + (count + 1) + " of " + retryFailedDeploymentCounter);
             }
             getDeployer().deploy(source, artifact, deploymentRepository, localRepository);
             exception = null;
             break;
          }
-         catch (ArtifactDeploymentException e)
-         {
-            if (count + 1 < retryFailedDeploymentCounter)
-            {
+         catch (ArtifactDeploymentException e) {
+            if (count + 1 < retryFailedDeploymentCounter) {
                getLog().warn("Encountered issue during deployment: " + e.getLocalizedMessage());
                getLog().debug(e);
             }
-            if (exception == null)
-            {
+            if (exception == null) {
                exception = e;
             }
          }
       }
-      if (exception != null)
-      {
+      if (exception != null) {
          throw exception;
       }
    }
